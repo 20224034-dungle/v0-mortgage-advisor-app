@@ -205,12 +205,29 @@ export default function MortgageAdvisor() {
   const [selectedBankId, setSelectedBankId] = useState(null);
   const ROWS = 12;
 
-  // Step 1
-  const [form, setForm] = useState({ propertyPrice: "", downPayment: "", monthlyIncome: "", loanTerm: "20" });
+  // Step 1 - Default values for a typical property scenario
+  const [form, setForm] = useState({
+    propertyPrice: "3000000000",  // 3 billion VND
+    downPayment: "900000000",     // 900 million VND (30%)
+    monthlyIncome: "50000000",    // 50 million VND
+    loanTerm: "20"                // 20 years
+  });
   const setF = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  // Step 2 — bank rates
-  const initRates = () => BANKS.reduce((acc, b) => ({ ...acc, [b.id]: { fixed: "", floating: "", promoMonths: 12 } }), {});
+  // Step 2 — bank rates with default values based on typical 2024 rates
+  const initRates = () => BANKS.reduce((acc, b) => {
+    const defaults: Record<string, { fixed: string; floating: string; promoMonths: number }> = {
+      vcb:  { fixed: "6.5",  floating: "9.0",  promoMonths: 12 },
+      bidv: { fixed: "6.8",  floating: "9.2",  promoMonths: 12 },
+      agri: { fixed: "6.5",  floating: "8.8",  promoMonths: 18 },
+      vtb:  { fixed: "6.7",  floating: "9.0",  promoMonths: 12 },
+      tech: { fixed: "7.5",  floating: "10.5", promoMonths: 24 },
+      vpb:  { fixed: "7.8",  floating: "11.0", promoMonths: 24 },
+      mb:   { fixed: "7.0",  floating: "9.5",  promoMonths: 18 },
+      acb:  { fixed: "7.2",  floating: "10.0", promoMonths: 12 },
+    };
+    return { ...acc, [b.id]: defaults[b.id] || { fixed: "", floating: "", promoMonths: 12 } };
+  }, {} as Record<string, { fixed: string; floating: string; promoMonths: number }>);
   const [bankRates, setBankRates] = useState(initRates);
   const setRate = (id, field, val) => setBankRates(p => ({ ...p, [id]: { ...p[id], [field]: val } }));
 
